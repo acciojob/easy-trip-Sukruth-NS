@@ -36,16 +36,33 @@ public class AirportRepository {
 
     public String bookATicket(Integer flightId, Integer passengerId) {
 
-        Flight flight = flightDb.get(flightId);
-        List<Integer> passengers = flightTicketBookingDb.get(flightId);
-        int noOfPassengers = passengers.size();
-        if(noOfPassengers < flight.getMaxCapacity() && !passengers.contains(passengerId)){
+        if(flightTicketBookingDb.get(flightId)!=null &&(flightTicketBookingDb.get(flightId).size()<flightDb.get(flightId).getMaxCapacity())){
+
+            List<Integer> passengers =  flightTicketBookingDb.get(flightId);
+
+            if(passengers.contains(passengerId)){
+                return "FAILURE";
+            }
+
             passengers.add(passengerId);
-            flightTicketBookingDb.put(flightId, passengers);
+            flightTicketBookingDb.put(flightId,passengers);
             return "SUCCESS";
         }
-        else
-            return "FAILURE";
+        else if(flightTicketBookingDb.get(flightId)==null)
+        {
+            flightTicketBookingDb.put(flightId,new ArrayList<>());
+            List<Integer> passengers =  flightTicketBookingDb.get(flightId);
+
+            if(passengers.contains(passengerId)){
+                return "FAILURE";
+            }
+
+            passengers.add(passengerId);
+            flightTicketBookingDb.put(flightId,passengers);
+            return "SUCCESS";
+
+        }
+        return "FAILURE";
 
     }
     public String getLargestAirportName() {
@@ -68,25 +85,25 @@ public class AirportRepository {
 
     public double getShortestDurationOfPossibleBetweenTwoCities(City fromCity, City toCity) {
 
-        double distance = Integer.MAX_VALUE;
-
-        for(Flight flight:flightDb.values()){
-
-            if((flight.getFromCity().equals(fromCity))&&(flight.getToCity().equals(toCity))){
-                distance = Math.min(distance,flight.getDuration());
+        double ans = Integer.MAX_VALUE;
+        for(Flight flight : flightDb.values()){
+            City from = flight.getFromCity();
+            City to = flight.getToCity();
+            if(fromCity.equals(from) && toCity.equals(to)){
+                ans = Math.min(ans, flight.getDuration());
             }
         }
-
-        if(distance==Integer.MAX_VALUE){
+        if(ans == Integer.MAX_VALUE){
             return -1;
         }
-
-        return distance;
+        else{
+            return ans;
+        }
     }
 
     public int getNumberOfPeopleOn(Date date, String airportName) {
         Airport airport = airportDb.get(airportName);
-        if(Objects.isNull(airport)){
+        if(airport==null){
             return 0;
         }
         City city = airport.getCity();
@@ -103,8 +120,10 @@ public class AirportRepository {
     }
 
     public int calculateFlightFare(Integer flightId) {
-        int noOfPeopleBooked = flightTicketBookingDb.get(flightId).size();
-        return noOfPeopleBooked*50 + 3000;
+        int ans = 0;
+        List<Integer> passengers = flightTicketBookingDb.get(flightId);
+        ans += 3000 + (passengers.size() * 50);
+        return ans;
     }
 
     public String cancelATicket(Integer flightId, Integer passengerId) {
@@ -112,8 +131,6 @@ public class AirportRepository {
         if(passengers == null){
             return "FAILURE";
         }
-
-
         if(passengers.contains(passengerId)){
             passengers.remove(passengerId);
             return "SUCCESS";
@@ -146,9 +163,7 @@ public class AirportRepository {
 
     public int calculateRevenueOfAFlight(Integer flightId) {
         int noOfPeopleBooked = flightTicketBookingDb.get(flightId).size();
-        int theFlare = (noOfPeopleBooked*(noOfPeopleBooked + 1)) * 25;
-        int fixedFare = 3000 * noOfPeopleBooked;
-        int totalFare = theFlare + fixedFare;
+        int totalFare = (25 * noOfPeopleBooked * noOfPeopleBooked) + (2975 * noOfPeopleBooked);
 
         return totalFare;
     }
