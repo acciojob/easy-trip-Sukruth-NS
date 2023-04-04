@@ -17,9 +17,10 @@ public class AirportRepository {
     HashMap<Integer,Passenger> passengerDb = new HashMap<Integer,Passenger>();
 
     HashMap<Integer,List<Integer>> flightTicketBookingDb = new HashMap<Integer, List<Integer>>();
+
+
     public String addAirport(Airport airport) {
-        String key = airport.getAirportName();
-        airportDb.put(key, airport);
+        airportDb.put(airport.getAirportName(),airport);
         return "SUCCESS";
     }
 
