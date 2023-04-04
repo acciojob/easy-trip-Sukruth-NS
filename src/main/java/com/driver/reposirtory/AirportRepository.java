@@ -84,7 +84,21 @@ public class AirportRepository {
     }
 
     public int getNumberOfPeopleOn(Date date, String airportName) {
-        return 0;
+        Airport airport = airportDb.get(airportName);
+        if(Objects.isNull(airport)){
+            return 0;
+        }
+        City city = airport.getCity();
+        int count = 0;
+        for(Flight flight:flightDb.values()){
+            if(date.equals(flight.getFlightDate()))
+                if(flight.getToCity().equals(city)||flight.getFromCity().equals(city)){
+
+                    int flightId = flight.getFlightId();
+                    count = count + flightTicketBookingDb.get(flightId).size();
+                }
+        }
+        return count;
     }
 
     public int calculateFlightFare(Integer flightId) {
@@ -93,7 +107,17 @@ public class AirportRepository {
     }
 
     public String cancelATicket(Integer flightId, Integer passengerId) {
-        return null;
+        List<Integer> passengers = flightTicketBookingDb.get(flightId);
+        if(passengers == null){
+            return "FAILURE";
+        }
+
+
+        if(passengers.contains(passengerId)){
+            passengers.remove(passengerId);
+            return "SUCCESS";
+        }
+        return "FAILURE";
     }
 
     public int countOfBookingsDoneByPassengerAllCombined(Integer passengerId) {
@@ -120,6 +144,11 @@ public class AirportRepository {
     }
 
     public int calculateRevenueOfAFlight(Integer flightId) {
-        return 0;
+        int noOfPeopleBooked = flightTicketBookingDb.get(flightId).size();
+        int theFlare = (noOfPeopleBooked*(noOfPeopleBooked + 1)) * 25;
+        int fixedFare = 3000 * noOfPeopleBooked;
+        int totalFare = theFlare + fixedFare;
+
+        return totalFare;
     }
 }
