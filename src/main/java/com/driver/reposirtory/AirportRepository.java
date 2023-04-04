@@ -48,7 +48,21 @@ public class AirportRepository {
 
     }
     public String getLargestAirportName() {
-        return null;
+
+        String ans = "";
+        int terminals = 0;
+        for(Airport airport : airportDb.values()){
+
+            if(airport.getNoOfTerminals()>terminals){
+                ans = airport.getAirportName();
+                terminals = airport.getNoOfTerminals();
+            }else if(airport.getNoOfTerminals()==terminals){
+                if(airport.getAirportName().compareTo(ans)<0){
+                    ans = airport.getAirportName();
+                }
+            }
+        }
+        return ans;
     }
 
     public double getShortestDurationOfPossibleBetweenTwoCities(City fromCity, City toCity) {
@@ -95,6 +109,13 @@ public class AirportRepository {
     }
 
     public String getAirportNameFromFlightId(Integer flightId) {
+        if(flightDb.containsKey(flightId)){
+            City city = flightDb.get(flightId).getFromCity();
+            for(Airport airport : airportDb.values()){
+                if (airport.getCity().equals(city))
+                    return airport.getAirportName();
+            }
+        }
         return null;
     }
 
